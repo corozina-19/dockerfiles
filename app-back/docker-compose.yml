@@ -1,0 +1,79 @@
+version: '2'
+
+services:
+
+
+  app-back-nginx:
+    image: nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./app-back-nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /mnt/app-back/:/app/
+        # - static:/mnt/covid19-rest/static/
+    depends_on:
+      - covid19-rest-django
+
+  app-back-django:
+    build:
+      context: .
+      dockerfile: Dockerfile.django
+      args:
+        branch: master
+        #depends_on:
+        #- covid19-rest-rabbitmq
+        #- covid19-rest-postgres
+    volumes:
+      - /mnt/app-back/:/app/
+        # - static:/mnt/covid19-rest/static/
+    ports:
+      - 8000:8000
+
+
+  app-back-celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.django
+      args:
+        branch: master
+    depends_on:
+      - app-back-rabbitmq
+    volumes:
+      - /mnt/app-back/:/app/
+    entrypoint: ['celery','worker','--app=app-back','--loglevel=INFO','--logfile=/tmp/celery.log','--pidfile=/tmp/celery.pid','-Ofair']
+
+
+  app-back-celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.django
+      args:
+        branch: master
+    depends_on:
+      - app-back-rabbitmq
+    volumes:
+      - /mnt/app-back/:/app/
+    entrypoint: ['celery', 'beat', '--app=app-back', '--schedule=/tmp/celery-beat.scheduler', '--loglevel=INFO', '--logfile=/tmp/celerybeat.log', '--pidfile=/tmp/celery-beat.pid']
+
+  app-back-postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: covid-app-back
+      POSTGRES_PASSWORD: covid-app-back
+      POSTGRES_DB: covid-app-back
+      PGDATA: /data/postgres
+    volumes:
+       - /mnt/postgres-data/:/data/postgres
+
+  app-back-rabbitmq:
+    image: rabbitmq:3.6
+    hostname: app-back-rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=covid19-app-back
+      - RABBITMQ_DEFAULT_PASS=covid19-app-back
+    volumes:
+      - /mnt/rabbitmq-data/:/var/lib/rabbitmq
+
+volumes:
+  static:
+  media:
