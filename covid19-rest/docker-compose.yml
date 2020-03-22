@@ -53,7 +53,7 @@ services:
       - covid19-rest-rabbitmq
     volumes:
       - /mnt/covid19-rest/:/app/
-    entrypoint: ['celery', 'beat', '--app=covid_19', '--schedule=/tmp/celery-beat.scheduler', '--loglevel=INFO', '--logfile=/dev/stdout', '--pidfile=/tmp/celery-beat.pid']
+    entrypoint: ['celery', 'beat', '--app=covid_19', '--schedule=/tmp/celery-beat.scheduler', '--loglevel=INFO', '--logfile=/tmp/celerybeat.log', '--pidfile=/tmp/celery-beat.pid']
 
   covid19-rest-postgres:
     image: postgres:latest
