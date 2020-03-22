@@ -1,0 +1,91 @@
+version: '3'
+
+services:
+
+
+  covid19-rest-nginx:
+    image: nginx
+    ports:
+      - 8000:80
+    volumes:
+      - ./covid19-rest-nginx.conf:/etc/nginx/conf.d/local.conf
+      - static:/mnt/covid19-rest/static/
+    depends_on:
+      - covid19-rest-django
+
+  covid19-rest-django:
+    build:
+      context: .
+      dockerfile: Dockerfile.django
+      args:
+        branch: master
+        #depends_on:
+        #- covid19-rest-rabbitmq
+        #- covid19-rest-postgres
+    volumes:
+      - /mnt/covid19-rest/:/app/
+      - static:/mnt/covid19-rest/static/
+    ports:
+      - 8080:8000
+
+
+  covid19-rest-celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.django
+      args:
+        branch: master
+    depends_on:
+      - covid19-rest-rabbitmq
+      - covid19-rest-postfix
+      - covid19-rest-redis
+    volumes:
+      - /mnt/covid19-rest/:/app/
+    entrypoint: ['celery','worker','--app=claro_rollout','--loglevel=INFO','--logfile=/tmp/celery.log','--pidfile=/tmp/celery.pid','-Ofair']
+
+  covid19-rest-celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.django
+      args:
+        branch: master
+    depends_on:
+      - covid19-rest-rabbitmq
+    volumes:
+      - /mnt/covid19-rest/:/app/
+    entrypoint: ['celery','worker','--app=claro_rollout','--loglevel=INFO','--logfile=/tmp/dataimporter.log','--queues=DataImporter','--pidfile=/tmp/celery.pid','-Ofair']
+
+  covid19-rest-celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.django
+      args:
+        branch: master
+    depends_on:
+      - covid19-rest-rabbitmq
+    volumes:
+      - /mnt/covid19-rest/:/app/
+    entrypoint: ['celery', 'beat', '--app=claro_rollout', '--schedule=/tmp/celery-beat.scheduler', '--loglevel=INFO', '--logfile=/dev/stdout', '--pidfile=/tmp/celery-beat.pid']
+
+  covid19-rest-postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: covidrest
+      POSTGRES_PASSWORD: covidrest
+      POSTGRES_DB: covidrest
+      PGDATA: /data/postgres
+    volumes:
+       - /mnt/postgres-data/:/data/postgres
+
+  covid19-rest-rabbitmq:
+    image: rabbitmq:3.6
+    hostname: covid19-rest-rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=covid19
+      - RABBITMQ_DEFAULT_PASS=covid19
+    volumes:
+      - /mnt/rabbitmq-data/:/var/lib/rabbitmq
+
+volumes:
+  static:
+  media:
