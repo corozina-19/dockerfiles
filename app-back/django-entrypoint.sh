@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-APPDIR="/app/"
+APPDIR=${APP_PATH}
 
 ls -la /app/
 
@@ -14,7 +14,7 @@ if [ "$1" = 'gunicorn' ] || [ "${#}" -eq 0 ]; then
         echo "[INFO] Running 'python manage.py migrate'..."
         python manage.py migrate --noinput
         ## start uWSGI
-        uwsgi --master --http 0.0.0.0:8000 --chdir /app/ --wsgi-file /app/covid_19/wsgi.py \
+        uwsgi --master --http 0.0.0.0:8000 --chdir /app/ --wsgi-file /app/app-back/wsgi.py \
         --static-map /static/=/app/static/ --static-map /media/=/app/media/       \
         --uid django --gid django --processes 5 --buffer-size=32768
 else
