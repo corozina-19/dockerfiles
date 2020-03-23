@@ -74,7 +74,8 @@ RUN chmod 777 /dev/stdout /dev/stderr && \
     ssh-add -l && git clone ${repository} --branch ${branch} ${folder} && \
     rm -r /root/.ssh && \
     ## GET requirements.txt FROM GITHUB
-    pip install -r /tmp/${folder}/requirements.txt && \
+    cd ${folder}  && \
+    pip install -r requirements.txt && \
     mkdir /app && \
     mv ${folder} /app/ && \
     ## DO NOT RUN CELERY / GUNICORN AS ROOT
