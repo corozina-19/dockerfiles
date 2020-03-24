@@ -105,7 +105,6 @@ ext-folder-name(){
   echo "$folder"
 
 }
-#https://github.com/martinezhenry/dockerfiles.git
 #################################################
 
 ## validations
