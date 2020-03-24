@@ -2,8 +2,8 @@
 set -e
 
 ###################################################
-##config
-export repository=$2
+
+export folder_name=$4
 
 ##funtions
 abort() {
@@ -42,14 +42,16 @@ destroy() {
 clone() {
   print "moving to mnt folder"
   cd /mnt
-  if [ ! -d "dockerfiles" ]; then
-    git clone $repository
-    cd dockerfiles
+  folder=$(ext-folder-name "$1")
+  print "$folder"
+  if [ ! -d "$folder" ]; then
+    git clone "$1"
+    cd "$folder"
   else
-    cd dockerfiles
+    cd "$folder"
     git pull --all
   fi
-  cd app-back
+
 }
 
 validation() {
@@ -68,7 +70,12 @@ validation() {
   fi
 
   if [ -z "$2" ]; then
-    print_error "please specificate a repository"
+    print_error "please specificate a repository of docker-compose"
+    abort
+  fi
+
+  if [ -z "$3" ]; then
+    print_error "please specificate a repository of app"
     abort
   fi
 
@@ -89,14 +96,34 @@ process-action() {
   fi
 }
 
+ext-folder-name(){
+
+  total_len=${#1}
+  str=${1%/*}
+  len2=${#str}
+  folder=${1:len2+1:total_len-5-len2}
+  echo "$folder"
+
+}
+#https://github.com/martinezhenry/dockerfiles.git
 #################################################
 
 ## validations
-validation "$1" "$2"
+validation "$1" "$2" "$3"
 
 print "Starting docker compose app-back..."
-print "cloning repository"
-clone
+print "cloning repository of docker compose"
+clone "$2"
+
+print "cloning repository of app"
+clone "$3"
+
+cd /mnt
+folder=$(ext-folder-name $2)
+cd "$folder"
+
+folder=$(ext-folder-name $3)
+cd "$folder"
 
 print "deploying compose file"
 process-action "$1"
