@@ -25,7 +25,7 @@ services:
     environment:
       - APP_PATH:"/app/app-back"
     volumes:
-      - /mnt/dockerfiles/app-back/:/app/
+      - /mnt/app-back/:/app/
     ports:
       - ${app_port}:8000
 
