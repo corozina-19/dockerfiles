@@ -38,6 +38,7 @@ services:
       args:
         branch: ${branch}
         repository: ${repository}
+        folder: ${folder_app}
     depends_on:
       - app-back-rabbitmq
     volumes:
@@ -53,6 +54,7 @@ services:
       args:
         branch: ${branch}
         repository: ${repository}
+        folder: ${folder_app}
     depends_on:
       - app-back-rabbitmq
     volumes:
