@@ -7,6 +7,8 @@ ls -la /app/
 
 cd $APPDIR
 
+pwd
+
 if [ "$1" = 'gunicorn' ] || [ "${#}" -eq 0 ]; then
         echo -n "[INFO] Running 'python manage.py collectstatic'..."
         python manage.py collectstatic --noinput >/dev/null
