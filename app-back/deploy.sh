@@ -58,10 +58,10 @@ validation() {
     abort
   fi
 
-  if [ "$1" != "deploy" ]; then
+  if [ "$1" != "up" ]; then
     if [ "$1" != "build" ]; then
       if [ "$1" != "down" ]; then
-        print_error "action ($1) invalid, allow 'build', 'deploy' or 'down'"
+        print_error "action ($1) invalid, allow 'build', 'up' or 'down'"
         abort
       fi
     fi
@@ -85,7 +85,7 @@ process-action() {
     print "downing compose file"
     build
   else
-    print_error "action ($1) invalid, allow 'build', 'deploy' or 'down'"
+    print_error "action ($1) invalid, allow 'build', 'up' or 'down'"
   fi
 }
 
