@@ -15,7 +15,7 @@ export pass_rabbit=covid19
 
 ## LOADING ENVIRONMENT VARIABLES NGINX
 export nginx_version=latest
-export nginx_port=80
+export nginx_port=8080
 
 ## LOADING ENVIRONMENT VARIABLES POSTGRES
 export version_postgres=latest
