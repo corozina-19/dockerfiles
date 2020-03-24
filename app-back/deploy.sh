@@ -3,7 +3,7 @@ set -e
 
 ###################################################
 ##config
-export repository=https://github.com/martinezhenry/dockerfiles.git
+export repository=$2
 
 ##funtions
 abort() {
@@ -12,11 +12,11 @@ abort() {
 }
 
 print() {
-  echo "---INFO: " $1
+  echo "---INFO: " "$1"
 }
 
 print_error() {
-  echo "---ERROR: " $1
+  echo "---ERROR: " "$1"
 }
 
 load_env() {
@@ -67,28 +67,36 @@ validation() {
     fi
   fi
 
+  if [ -z "$2" ]; then
+    print_error "please specificate a repository"
+    abort
+  fi
+
+}
+
+process-action() {
+  if [ "$1" = "up" ]; then
+    print "deploying compose file"
+    deploy
+  elif [ "$1" = "build" ]; then
+    print "building compose file"
+    build
+  elif [ "$1" = "down" ]; then
+    print "downing compose file"
+    build
+  else
+    print_error "action ($1) invalid, allow 'build', 'deploy' or 'down'"
+  fi
 }
 
 #################################################
 
 ## validations
-validation "$1"
+validation "$1" "$2"
 
 print "Starting docker compose app-back..."
 print "cloning repository"
 clone
 
 print "deploying compose file"
-
-if [ "$1" = "up" ]; then
-  print "deploying compose file"
-  deploy
-elif [ "$1" = "build" ]; then
-  print "building compose file"
-  build
-elif [ "$1" = "down" ]; then
-  print "downing compose file"
-  build
-else
-  print_error "action ($1) invalid, allow 'build', 'deploy' or 'down'"
-fi
+process-action "$1"
