@@ -1,3 +1,4 @@
+#!/bin/bash
 
 ## LOADING ENVIRONMENT VARIABLES APP_BACK
 export repository=git@github.com:martinezhenry/app-back.git
