@@ -77,7 +77,7 @@ RUN chmod 777 /dev/stdout /dev/stderr && \
     cd ${folder}  && \
     pip install -r requirements.txt && \
     mkdir /app && \
-    mv ${folder} /app/ && \
+    cd .. && mv ${folder} /app/ && \
     ## DO NOT RUN CELERY / GUNICORN AS ROOT
     groupadd -g 1000 -r django && useradd -r -u 1000 -g django django
 
