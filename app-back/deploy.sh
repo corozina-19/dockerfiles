@@ -1,42 +1,94 @@
 #!/bin/bash
 set -e
 
-if (whoami != root); then
-  echo "Please run as root"
-  exit
-fi
-
+###################################################
 ##config
 export repository=https://github.com/martinezhenry/dockerfiles.git
 
 ##funtions
+abort() {
+  print_error "aborting..."
+  exit
+}
+
+print() {
+  echo "---INFO: " $1
+}
+
+print_error() {
+  echo "---ERROR: " $1
+}
+
+load_env() {
+  print "loading environment..."
+  source ./env.sh
+}
+
 deploy() {
+  load_env
   docker-compose up
 }
 
 build() {
+  load_env
   docker-compose build
 }
 
-echo "Starting docker compose app-back..."
+destroy() {
+  load_env
+  docker-compose down
+}
 
-echo "moving to mnt folder"
-cd /mnt
+clone() {
+  print "moving to mnt folder"
+  cd /mnt
+  if [ ! -d "dockerfiles" ]; then
+    git clone $repository
+    cd dockerfiles
+  else
+    cd dockerfiles
+    git pull --all
+  fi
+  cd app-back
+}
 
-echo "cloning repository"
-git clone $repository
+validation() {
+  if [ "$EUID" -ne 0 ]; then
+    print_error "Please run as root"
+    abort
+  fi
 
-echo "loading environment..."
-source ./env.sh
+  if [ "$1" != "deploy" ]; then
+    if [ "$1" != "build" ]; then
+      if [ "$1" != "down" ]; then
+        print_error "action ($1) invalid, allow 'build', 'deploy' or 'down'"
+        abort
+      fi
+    fi
+  fi
 
-echo "deploying compose file"
+}
 
-if [ "$1" = "deploy" ]; then
-  echo "deploying compose file"
+#################################################
+
+## validations
+validation "$1"
+
+print "Starting docker compose app-back..."
+print "cloning repository"
+clone
+
+print "deploying compose file"
+
+if [ "$1" = "up" ]; then
+  print "deploying compose file"
   deploy
-elif [ "$1" = "buld" ]; then
-  echo "deploying compose file"
+elif [ "$1" = "build" ]; then
+  print "building compose file"
+  build
+elif [ "$1" = "down" ]; then
+  print "downing compose file"
   build
 else
-  echo "action ($1) invalid, allow build or deploy"
+  print_error "action ($1) invalid, allow 'build', 'deploy' or 'down'"
 fi
