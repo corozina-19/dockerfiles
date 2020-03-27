@@ -8,7 +8,7 @@ services:
     ports:
       - 80:80
     volumes:
-      - ./covid19-rest-nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./app-back-nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - /mnt/covid19-rest/:/app/
         # - static:/mnt/covid19-rest/static/
     depends_on:
